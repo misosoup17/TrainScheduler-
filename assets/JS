@@ -6,7 +6,7 @@ $(document).ready(function() {
         authDomain: "train-schedule-68cfe.firebaseapp.com",
         databaseURL: "https://train-schedule-68cfe.firebaseio.com",
         projectId: "train-schedule-68cfe",
-        storageBucket: "",
+        storageBucket: "train-schedule-68cfe.appspot.com",
         messagingSenderId: "619667029089",
         appId: "1:619667029089:web:06a4a104a7dd9d4787be20"
       };
@@ -14,10 +14,15 @@ $(document).ready(function() {
   firebase.initializeApp(config);
 
   var database = firebase.database();
+  
+  $('#loginButton").click(function()){
+      var ref = firebase.database().ref('Timestamp').update({
+          [CurrentTime]
+      })
+  }
 
  
 
-  // First Time (pushed back 1 year to make sure it comes before current time)
    
   // 2. Button for adding Trains
   $("#add-train-btn").on("click", function(event) {
