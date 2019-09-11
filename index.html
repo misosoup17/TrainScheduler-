@@ -1,131 +1,100 @@
 <!DOCTYPE html>
+
 <html lang="en-us">
 
 <head>
+    <meta charset="UTF-8">
+    <title>Train Schedule</title>
 
-  <meta charset="UTF-8">
-  <title>Train Scheduler</title>
+    <!--Bootstrap-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css' rel='stylesheet' />
+    <style>
+        body { margin:0; padding:0; }
+        #map { position:absolute; top:0; bottom:0; width:100%; }
+    </style>
 
-  <!-- jQuery -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
-  <!-- Bootstrap CDN -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
-  <!-- Custom CSS file -->
-  <link rel="stylesheet" href="assets/style.css">
-
-  <!-- Firebase Reference -->
-  <script src="https://www.gstatic.com/firebasejs/4.8.1/firebase.js"></script>
-
-  <!-- Moment.js Reference! -->
-  <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
-
+    <!--Firebase Link-->
+    <script src="https://www.gstatic.com/firebasejs/5.5.8/firebase.js"></script>
 </head>
 
 <body>
-
-  <!-- Div containing the entire page -->
-  <div class="container">
-
-    <!-- Header for page -->
-    <div class="jumbotron">
-      <div class="row">
-        <div class="col-md-12">
-          <img src="assets/images/gothamcity.png" alt="Gotham City" class="cityPic">
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          <h1 class="text-center"><strong>Gotham City Transit Authority</strong></h1>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-          <h3 class="text-center">The most up-to-date train information and scheduler for the GCTA.</h3>
-        </div>
-      </div>
-    </div>
-
-    <!-- Contains both tables on page -->
-    <div class="row">
-
-      <div class="col-md-12">
-
-        <!-- Current scheduled trains -->
-        <div class="panel panel-primary">
-
-          <!-- Current train table header -->
-          <div class="panel-heading">
-            <h3 class="panel-title"><strong>Current Train Schedule</strong></h3>
-          </div>
-
-          <!-- Current train table content -->
-          <div class="panel-body">
-            <table class="table table-hover" id="train-table">
-              <thead>
-                <tr>
-                  <th>Train Name</th>
-                  <th>Destination</th>
-                  <th>Frequency (minutes)</th>
-                  <th>Next Arrival</th>
-                  <th>Minutes Away</th>
-                </tr>
-              </thead>
-              <tbody>
-              </tbody>
-            </table>
-          </div>
-
+    <div class="container">
+        <div class="jumbotron">
+            <h1 class="text-center">Northwest Train Routes</h1>
+            <h3 class="text-center">Your Adventure Begins Here</h3>
         </div>
 
-        <!-- Add a new train -->
-        <div class="panel panel-primary">
+        <div class="card border-primary mb-3">
+            <div class="card-header text-white bg-primary mb-3">Current Train Schedule</div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Train Name</th>
+                            <th scope="col">Destination</th>
+                            <th scope="col">Frequency (min)</th>
+                            <th scope="col">Next Arrival</th>
+                            <th scope="col">Minutes Away</th>
+                        </tr>
+                    </thead>
+                    <tbody id="full-table">
+                        <tr>
+                            <td scope="row" id="name"></td>
+                            <td id="destination"></td>
+                            <td id="frequency"></td>
+                            <td id="next-arrival"></td>
+                            <td id="minutes-away"></td>  
+                        </tr>
 
-          <!-- Add a new train table header -->
-          <div class="panel-heading">
-            <h3 class="panel-title"><strong>Add a Train</strong></h3>
-          </div>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <br>
 
-          <!-- Add a new train table content -->
-          <div class="panel-body">
-
-            <!-- Form that takes the user input for new trains -->
-            <form>
-              <div class="form-group">
-                <label>Train Name</label>
-                <input class="form-control" id="train-name-input" type="text">
-              </div>
-              <div class="form-group">
-                <label>Destination</label>
-                <input class="form-control" id="destination-input" type="text">
-              </div>
-              <div class="form-group">
-                <label>First Train Time (HH:mm - military time)</label>
-                <input class="form-control" id="first-train-input" type="text">
-              </div>
-              <div class="form-group">
-                <label>Frequency (minutes)</label>
-                <input class="form-control" id="frequency-input" type="text">
-              </div>
-              <button class="btn" id="add-train-btn" type="submit">Submit</button>
-            </form>
-
-          </div>
-
+        <!--Add Train-->
+        <div class="card border-primary mb-3">
+            <div class="card-header text-white bg-primary mb-3">Add Train</div>
+            <div class="card-body">
+                    <form method="POST" action="form-handler" onsubmit="return checkForm(this);">
+                 <!-- form class="needs-validation" novalidate> -->
+                    <div class="form-group">
+                        <label for="train-name">Train Name</label>
+                        <input class="form-control" id="train-name" type="text" required>
+                        <div class="invalid-feedback" id="invalid-name"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="train-destination">Destination</label>
+                        <input class="form-control" id="train-destination" type="text" required>
+                        <div class="invalid-feedback" id="invalid-destination"></div>
+                    </div>
+                    <div class="form-group" id="firstTime">
+                        <label for="train-first-time">First Train Time (HH:mm - military time)</label>
+                        <input class="form-control" id="train-first-time" type="text" required>
+                        <div class="invalid-feedback" id="invalid-time"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="train-frequency">Frequency (min)</label>
+                        <input class="form-control" id="train-frequency" type="number" min="1" required>
+                        <div class="invalid-feedback" id="invalid-frequency"></div>
+                    </div>
+                    <button class="btn btn-primary" id="submit-button" type="submit">Submit</button>
+                </form>
+            </div>
         </div>
 
-      </div>
 
     </div>
 
-  </div>
+    <!--jQuery-->
+    <script src="https://code.jquery.com/jquery.js"></script>
+      <!-- Link to Moment.js -->
+  <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
 
-  <!-- Link to the external JavaScript -->
-  <script type="text/javascript" src="assets/app.js"></script>
-
+    <!--JavaScript-->
+    <script src="javascript/logic.js"></script>
 </body>
-
-
 </html>
